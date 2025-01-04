@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  authId: {
-    type: mongoose.Schema.Types.ObjectId,
+  email: {
+    type: String,
     ref: 'Auth',
     required: true,
   },
@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     type: [String],
   },
   avatarIndex: {
-    type: Number, 
+    type: Number,
     default: 0,
   },
   createdAt: {

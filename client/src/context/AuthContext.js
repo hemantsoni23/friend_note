@@ -8,13 +8,12 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const res = await axios.get(`${process.env.REACT_APP_API_ROUTE}/api/user/`, {
+            const res = await axios.get(`${process.env.REACT_APP_API_ROUTE}/api/users/`, {
                 headers: {
                     Authorization: `Bearer ${Cookies.get('accessToken')}`,
                 },
             });
-            const data = await res.json();
-            handleSetUser(data);
+            handleSetUser(res.data);
         }
         catch (err) {
             console.error(err);

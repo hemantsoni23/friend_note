@@ -24,7 +24,7 @@ const registerUser = async (req, res) => {
         const savedAuthUser = await newAuthUser.save();
         // Create a corresponding entry in the Users collection
         const newUser = new User({
-            authId: savedAuthUser._id, 
+            email: email, 
             name: username, 
             bio: '', 
             interests: [], 

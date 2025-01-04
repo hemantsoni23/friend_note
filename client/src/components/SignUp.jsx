@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { AuthContext } from "../context/AuthContext";
@@ -8,6 +9,7 @@ const SignUp = ({ toggleAuthView }) => {
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const { handleSetUser } = React.useContext(AuthContext);
+  const Navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +40,7 @@ const SignUp = ({ toggleAuthView }) => {
       Cookies.set("accessToken", accessToken);
       handleSetUser(newUser);
       setError(null);
+      Navigate("/profile");
     } catch (error) {
       setError(error.response?.data?.message || "Sign up failed. Please try again.");
     }

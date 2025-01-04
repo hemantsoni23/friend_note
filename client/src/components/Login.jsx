@@ -9,6 +9,7 @@ const Login = ({ toggleAuthView }) => {
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useContext(AuthContext);
+  const Navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +38,7 @@ const Login = ({ toggleAuthView }) => {
       Cookies.set("accessToken", accessToken);
       setError(null);
       login();
+      Navigate("/profile");
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Please try again.");
     }

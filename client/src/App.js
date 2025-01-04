@@ -1,13 +1,13 @@
-import React, { useContext } from "react";
+import React, { lazy, Suspense, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import Loader from "./components/Loader";
 import PrivateRoutes from "./components/PrivateRoutes";
-import Profile from "./pages/Profile";
 import { AuthContext } from "./context/AuthContext";
 
+const Home = lazy(() => import("./pages/Home"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -16,13 +16,13 @@ function App() {
     <div className="app flex">
       {user && <Sidebar />}
       <div className={`content ${user ? "flex-1" : "w-full"}`}>
-        <React.Suspense fallback={<Loader />}>
+        <Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<PrivateRoutes component={<Profile/>} />} />
+            <Route path="/profile" element={<PrivateRoutes><Profile /></PrivateRoutes>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </React.Suspense>
+        </Suspense>
       </div>
     </div>
   );
