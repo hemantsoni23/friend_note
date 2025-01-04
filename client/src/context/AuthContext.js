@@ -8,13 +8,13 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const res = await axios.get(`${process.env.REACT_APP_API}/api/user/`, {
+            const res = await axios.get(`${process.env.REACT_APP_API_ROUTE}/api/user/`, {
                 headers: {
                     Authorization: `Bearer ${Cookies.get('accessToken')}`,
                 },
             });
             const data = await res.json();
-            setUser(data);
+            handleSetUser(data);
         }
         catch (err) {
             console.error(err);
@@ -30,8 +30,12 @@ export const AuthProvider = ({ children }) => {
         Cookies.remove('accessToken');  
     };
 
+    const handleSetUser = (user) => {
+        setUser(user);
+    }
+
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, handleSetUser, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

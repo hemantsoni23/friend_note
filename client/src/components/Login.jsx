@@ -1,6 +1,8 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const Login = ({ toggleAuthView }) => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -25,9 +27,16 @@ const Login = ({ toggleAuthView }) => {
     }
 
     try {
-      // Backend API call logic for logging in
-      // Example: await login(email, password);
+      const response = await axios.post(`${process.env.REACT_APP_API_ROUTE}/api/auth/login`, credentials, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log(response.data);
+      const {accessToken} = response.data;
+      Cookies.set("accessToken", accessToken);
       setError(null);
+      login();
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Please try again.");
     }
@@ -49,6 +58,7 @@ const Login = ({ toggleAuthView }) => {
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your email"
+            autoComplete="email"
           />
         </div>
         <div className="mb-4">
@@ -64,6 +74,7 @@ const Login = ({ toggleAuthView }) => {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
+              autoComplete="current-password"
             />
             <button
               type="button"

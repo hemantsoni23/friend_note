@@ -5,7 +5,6 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.get('/', authMiddleware, getUserProfile);
 router.put('/update', authMiddleware, updateUserProfile);
-router.put('/updateUsername', authMiddleware, updateUsername);
 router.get('/recommendations', authMiddleware, getRecommendations);
 
 module.exports = router;

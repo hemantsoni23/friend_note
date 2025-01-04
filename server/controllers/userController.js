@@ -23,15 +23,6 @@ const updateUserProfile = async (req, res) => {
     }
 }
 
-const updateUsername = async (req, res) => {
-    try {
-        // TODO: Implement the update username logic
-    }catch(error){
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }  
-}
-
 const getRecommendations = async (req, res) => {
     try {
         // TODO: Implement the recommendation logic
@@ -44,6 +35,5 @@ const getRecommendations = async (req, res) => {
 module.exports = {
     getUserProfile,
     updateUserProfile,
-    updateUsername,
     getRecommendations,
 };

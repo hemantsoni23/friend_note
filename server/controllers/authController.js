@@ -1,4 +1,5 @@
 const Auth = require('../models/Auth')
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -15,14 +16,23 @@ const registerUser = async (req, res) => {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new Auth({
+        const newAuthUser = new Auth({
             email,
             username,
             password: hashedPassword,
         });
+        const savedAuthUser = await newAuthUser.save();
+        // Create a corresponding entry in the Users collection
+        const newUser = new User({
+            authId: savedAuthUser._id, 
+            name: username, 
+            bio: '', 
+            interests: [], 
+            avatarIndex: 0, 
+        });
         await newUser.save();
         const accessToken = createAccessToken({ email, username });
-        res.json({ accessToken });
+        res.json({ accessToken, newUser });
     }
     catch (error) {
         console.error(error);
@@ -50,7 +60,17 @@ const loginUser = async (req, res) => {
     }
 }
 
+const updateUsername = async (req, res) => {
+    try {
+        // TODO: Implement the update username logic
+    }catch(error){
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }  
+}
+
 module.exports = {
     registerUser,
     loginUser,
+    updateUsername,
 };
