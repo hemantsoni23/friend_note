@@ -4,7 +4,10 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
 import Loader from "./components/Loader";
+import PrivateRoutes from "./components/PrivateRoutes";
+import Profile from "./pages/Profile";
 import { AuthContext } from "./context/AuthContext";
+
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -16,6 +19,7 @@ function App() {
         <React.Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<PrivateRoutes component={<Profile/>} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </React.Suspense>
