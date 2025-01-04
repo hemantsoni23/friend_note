@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaUser, FaUsers, FaHeart, FaSignInAlt } from "react-icons/fa";
+import { FaUser, FaUsers, FaHeart, FaBars, FaSearch } from "react-icons/fa";
 
 const Sidebar = () => {
   const location = useLocation();
 
   const navItems = [
     { to: '/profile', label: 'Profile', icon: <FaUser /> },
+    { to: '/search', label: 'Search', icon: <FaSearch />},
     { to: '/friends', label: 'Friends', icon: <FaUsers /> },
     { to: '/recommendations', label: 'Recommendations', icon: <FaHeart /> },
-    { to: '#', label: 'Logout', icon: <FaSignInAlt /> },
+    { to: '#', label: 'Settings', icon: <FaBars /> },
   ];
 
   return (

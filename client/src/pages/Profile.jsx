@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
+import FriendsList from '../components/FriendsList';
 import { AuthContext } from '../context/AuthContext';
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
   
-  const avatarSrc = `${process.env.PUBLIC_URL}/assets/avatars/a_${user.avatarIndex}.png`;
-
+  if(!user) return <div>Loading ...</div>;
   return (
     <div className="p-6 ml-64 min-h-screen bg-background-light text-text-light">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
@@ -13,7 +13,7 @@ const Profile = () => {
           {/* Avatar Section */}
           <div className="flex-shrink-0">
             <img
-              src={avatarSrc}
+              src={`${process.env.PUBLIC_URL}/assets/avatars/a_${user.avatarIndex}.png`}
               alt="User Avatar"
               className="w-24 h-24 rounded-full object-cover"
             />
@@ -41,12 +41,7 @@ const Profile = () => {
         {/* Friend List Section */}
         <div className="mt-6">
           <h2 className="text-lg font-semibold mb-3">Friends ({user?.friends?.length || 0})</h2>
-          <button
-            className="text-primary hover:underline"
-            onClick={() => console.log('Show friend list')}
-          >
-            View all friends
-          </button>
+          <FriendsList friends={user.friends} />
         </div>
       </div>
     </div>
