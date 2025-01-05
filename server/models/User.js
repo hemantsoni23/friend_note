@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema({
     ref: 'Auth',
     required: true,
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,

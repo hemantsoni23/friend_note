@@ -5,9 +5,10 @@ const authMiddleware = (req, res, next) => {
     if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-
+    
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("Decoded", decoded);
         req.user = decoded; 
         next();
     } catch (error) {

@@ -18,20 +18,20 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
         const newAuthUser = new Auth({
             email,
-            username,
             password: hashedPassword,
         });
         const savedAuthUser = await newAuthUser.save();
         // Create a corresponding entry in the Users collection
         const newUser = new User({
             email: email, 
+            username: username,
             name: username, 
             bio: '', 
             interests: [], 
             avatarIndex: 0, 
         });
         await newUser.save();
-        const accessToken = createAccessToken({ email, username });
+        const accessToken = createAccessToken({ email });
         res.json({ accessToken, newUser });
     }
     catch (error) {
@@ -51,7 +51,7 @@ const loginUser = async (req, res) => {
         if (!validPassword) {
             return res.status(400).json({ message: 'Invalid password' });
         }
-        const accessToken = createAccessToken({ email, username: user.username });
+        const accessToken = createAccessToken({ email });
         res.json({ accessToken });
     }
     catch (error) {
@@ -60,17 +60,7 @@ const loginUser = async (req, res) => {
     }
 }
 
-const updateUsername = async (req, res) => {
-    try {
-        // TODO: Implement the update username logic
-    }catch(error){
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }  
-}
-
 module.exports = {
     registerUser,
     loginUser,
-    updateUsername,
 };
