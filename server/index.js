@@ -13,7 +13,7 @@ connectDB();
 app.use(express.json());
 app.use(morgan("dev"));
 
-if (process.env.NODE_ENV === 'Production') {
+if (process.env.NODE_ENV) {
   const allowedOriginPattern = /^https:\/\/.*\.vercel.app$/; //vercel domain
 
   const corsOptions = {
