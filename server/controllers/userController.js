@@ -10,17 +10,34 @@ const getUserProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
+        
         const userFriend = await UserFriend.findOne({ userId: user._id }).populate('friends');
 
-        const sentFriendRequests = await FriendRequest.find({ senderId: user._id }).populate('receiverId');
-        const receivedFriendRequests = await FriendRequest.find({ receiverId: user._id }).populate('senderId');
+        const sentFriendRequests = await FriendRequest.find({
+            senderId: user._id,
+            status: { $in: ['pending', 'rejected'] },
+        }).populate({
+            path: 'receiverId',
+            select: 'name username avatarIndex',
+        });
+
+        const receivedFriendRequests = await FriendRequest.find({
+            receiverId: user._id,
+            status: { $in: ['pending', 'rejected'] },
+        }).populate({
+            path: 'senderId',
+            select: 'name username avatarIndex', 
+        });
 
         const response = {
             ...user.toObject(),
             friends: userFriend?.friends || [],
-            sentFriendRequests,
-            receivedFriendRequests,
+            sentFriendRequests: sentFriendRequests.map(req => ({
+                ...req.toObject(),
+            })),
+            receivedFriendRequests: receivedFriendRequests.map(req => ({
+                ...req.toObject(),
+            })),
         };
 
         res.json(response);
@@ -28,7 +45,7 @@ const getUserProfile = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
 const getOtherUserProfile = async (req, res) => {
     try {
@@ -103,6 +120,56 @@ const getRecommendations = async (req, res) => {
     }
 }
 
+const acceptFriendRequest = async (req, res) => {
+    try {
+        const { requestId } = req.body;
+        const request = await FriendRequest.findById(requestId);
+        if (!request || request.status !== 'pending') {
+            return res.status(400).json({ message: 'Invalid request.' });
+        }
+        
+        request.status = 'accepted';
+        await request.save();
+
+        console.log(request);
+
+        // Add friends to both users' friend lists
+        await UserFriend.findOneAndUpdate(
+            { userId: request.senderId },
+            { $push: { friends: request.receiverId } },
+            { upsert: true } 
+        );
+        await UserFriend.findOneAndUpdate(
+            { userId: request.receiverId },
+            { $push: { friends: request.senderId } },
+            { upsert: true } 
+        );
+
+        res.json({ message: 'Friend request accepted.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+const rejectFriendRequest = async (req, res) => {
+    try {
+        const { requestId } = req.body;
+        const request = await FriendRequest.findById(requestId);
+        if (!request || request.status !== 'pending') {
+            return res.status(400).json({ message: 'Invalid request.' });
+        }
+        
+        request.status = 'rejected';
+        await request.save();
+
+        res.json({ message: 'Friend request rejected.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
 const updateUsername = async (req, res) => {
     try {
         // TODO: Implement the update username logic
@@ -120,4 +187,6 @@ module.exports = {
     getRecommendations,
     sendFriendRequest,
     updateUsername,
+    acceptFriendRequest,
+    rejectFriendRequest
 };

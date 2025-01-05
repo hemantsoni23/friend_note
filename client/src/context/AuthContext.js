@@ -24,6 +24,15 @@ export const AuthProvider = ({ children }) => {
         fetchUser();
     };
 
+    const refreshUser = (updatedUser) => {
+        if (updatedUser) {
+            setUser(updatedUser);
+        } else {
+            fetchUser();
+        }
+    };
+
+
     const logout = () => {
         setUser(null);
         Cookies.remove('accessToken');  
@@ -34,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, handleSetUser, login, logout }}>
+        <AuthContext.Provider value={{ user, handleSetUser, login, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

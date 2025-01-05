@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { AuthContext } from '../context/AuthContext';
 import MessageModal from '../components/MessageModal';
+import { AuthContext } from '../context/AuthContext';
+import { acceptFriendRequest, rejectFriendRequest } from '../utils/friendRequestsAPI';
 
 const Search = () => {
     const [query, setQuery] = useState('');
@@ -14,7 +15,7 @@ const Search = () => {
         button2_text: '',
         handleAction: null,
     });
-    const { user: loggedInUser } = useContext(AuthContext);
+    const { user: loggedInUser, refreshUser } = useContext(AuthContext);
 
     const handleSearch = async () => {
         if (!query) return;
@@ -50,6 +51,14 @@ const Search = () => {
                 button2_text: 'Close',
                 handleAction: () => setModalInfo({ ...modalInfo, show: false }),
             });
+            const updatedUser = {
+                ...loggedInUser,
+                sentFriendRequests: [
+                    ...loggedInUser.sentFriendRequests,
+                    { receiverId: { _id: friendId }, status: 'pending', createdAt: new Date() },
+                ],
+            };
+            refreshUser(updatedUser);
         } catch (error) {
             console.error('Error sending friend request:', error);
             setModalInfo({
@@ -59,6 +68,38 @@ const Search = () => {
                 button2_text: 'Close',
                 handleAction: () => setModalInfo({ ...modalInfo, show: false }),
             });
+        }
+    };
+
+    const handleAcceptFriendRequest = async (requestId) => {
+        try {
+            const response = await acceptFriendRequest(requestId);
+            setModalInfo({
+                show: true,
+                text: response?.message,
+                button1_text: '',
+                button2_text: 'Close',
+                handleAction: () => setModalInfo({ ...modalInfo, show: false }),
+            });
+            refreshUser();
+        } catch (error) {
+            console.error('Error handling accept request:', error);
+        }
+    };
+
+    const handleRejectFriendRequest = async (requestId) => {
+        try {
+            const response = await rejectFriendRequest(requestId);
+            setModalInfo({
+                show: true,
+                text: response?.message,
+                button1_text: '',
+                button2_text: 'Close',
+                handleAction: () => setModalInfo({ ...modalInfo, show: false }),
+            });
+            refreshUser();
+        } catch (error) {
+            console.error('Error handling reject request:', error);
         }
     };
 
@@ -86,13 +127,13 @@ const Search = () => {
                 <div className="flex gap-2">
                     <button
                         className="px-4 py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition"
-                        // onClick={() => handleAcceptFriendRequest(receivedRequest._id)}
+                        onClick={() => handleAcceptFriendRequest(receivedRequest._id)}
                     >
                         Accept
                     </button>
                     <button
                         className="px-4 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition"
-                        // onClick={() => handleRejectFriendRequest(receivedRequest._id)}
+                        onClick={() => handleRejectFriendRequest(receivedRequest._id)}
                     >
                         Reject
                     </button>
