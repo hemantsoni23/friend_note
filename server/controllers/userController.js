@@ -2,6 +2,12 @@ const User = require('../models/User');
 const UserFriend = require('../models/UserFriend');
 const FriendRequest = require('../models/FriendRequest');
 
+const calculateInterestMatch = (userInterests, friendInterests) => {
+    if (!userInterests || !friendInterests) return 0;
+    const intersection = userInterests.filter(interest => friendInterests.includes(interest));
+    return intersection.length / userInterests.length;
+};
+
 const getUserProfile = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.user.email });
@@ -96,46 +102,50 @@ const sendFriendRequest = async (req, res) => {
 
 const getRecommendations = async (req, res) => {
     try {
-        console.log("Fetching user details...");
         const userEmail = req.user.email;
 
+        // Fetch the current user's details
         const user = await User.findOne({ email: userEmail }).select('_id interests');
         if (!user) {
-            console.log("User not found");
             return res.status(404).json({ message: 'User not found' });
         }
 
-        console.log("Fetching user friend document...");
-        const userFriendDoc = await UserFriend.findOne({ _id: user._id });
-        if (!userFriendDoc) {
-            console.log("No friends found for user");
-            return res.status(404).json({ message: 'No friends found for the user' });
-        }
+        // Fetch the user's friends
+        const userFriendDoc = await UserFriend.findOne({ userId: user._id }).select('friends');
+        const userFriends = userFriendDoc?.friends?.map(friend => friend.toString()) || [];
 
-        const userFriends = userFriendDoc.friends.map(f => f.toString());
+        // Exclude the user's current friends and the user themselves
+        const excludedUsers = new Set([...userFriends, user._id.toString()]);
 
-        console.log("Fetching potential friends...");
-        const potentialFriends = await User.find({ _id: { $in: userFriends } })
-            .populate('friends')
-            .exec();
+        // Fetch potential friends (not in excludedUsers)
+        const potentialFriends = await User.find({ _id: { $nin: Array.from(excludedUsers) } });
 
-        console.log("Processing recommendations...");
-        const recommendations = potentialFriends
-            .filter(friend => !userFriends.includes(friend._id.toString()))
-            .map(friend => ({
-                userId: friend._id,
-                username: friend.username,
-                avatarIndex: friend.avatarIndex,
-                mutualFriends: friend.friends
-                    .filter(f => userFriends.includes(f._id.toString())).length,
-                interestMatch: calculateInterestMatch(user.interests, friend.interests),
-            }))
-            .sort((a, b) =>
+        // Map recommendations with mutual friends and interest match
+        const recommendations = await Promise.all(
+            potentialFriends.map(async friend => {
+                const friendFriendDoc = await UserFriend.findOne({ userId: friend._id }).select('friends');
+                const friendFriends = friendFriendDoc?.friends?.map(f => f.toString()) || [];
+
+                const mutualFriends = friendFriends.filter(f => userFriends.includes(f)).length;
+                const interestMatch = calculateInterestMatch(user.interests, friend.interests);
+
+                return {
+                    userId: friend._id,
+                    username: friend.username,
+                    avatarIndex: friend.avatarIndex,
+                    mutualFriends,
+                    interestMatch,
+                };
+            })
+        );
+
+        // Sort recommendations by mutual friends and interest match
+        recommendations.sort(
+            (a, b) =>
                 b.mutualFriends * 0.7 + b.interestMatch * 0.3 -
                 (a.mutualFriends * 0.7 + a.interestMatch * 0.3)
-            );
+        );
 
-        console.log("Sending recommendations...");
         res.json(recommendations);
     } catch (error) {
         console.error('Error in getRecommendations:', error);
@@ -247,7 +257,6 @@ const updateUsername = async (req, res) => {
 
 module.exports = {
     getUserProfile,
-    getOtherUserProfile,
     updateUserProfile,
     searchUsers,
     getRecommendations,

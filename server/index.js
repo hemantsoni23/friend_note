@@ -13,12 +13,35 @@ connectDB();
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Enable CORS
-app.use(cors());
+if (process.env.NODE_ENV === 'Production') {
+  const allowedOriginPattern = /^https:\/\/.*\.vercel.app$/; //vercel domain
 
-// Handle preflight requests explicitly
-app.options('*', cors());
+  const corsOptions = {
+    origin: (origin, callback) => {
+      if (allowedOriginPattern.test(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Methods", "Access-Control-Request-Headers"],
+    credentials: true,
+    enablePreflight: true
+  };
 
+  // Use CORS middleware with the configured options
+  app.use(cors(corsOptions));
+
+  // Handle preflight requests explicitly
+  app.options('*', cors(corsOptions));
+} else {
+  // Enable CORS
+  app.use(cors());
+
+  // Handle preflight requests explicitly
+  app.options('*', cors());
+}
 app.all('', (req, res) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
