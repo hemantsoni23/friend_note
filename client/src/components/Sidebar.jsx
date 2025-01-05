@@ -66,9 +66,9 @@ const Sidebar = () => {
         isOpen={isSettingsOpen}
         onClose={() => setSettingsOpen(false)}
         onThemeToggle={toggleTheme}
-        onDeleteAccount={() => console.log('Delete Account')}
+        onDeleteAccount={() => alert('Delete Account this feature is not available yet')}
         onLogout={logoutUser}
-        onChangeUsername={() => console.log('Change Username')}
+        onChangeUsername={() => alert('Change Username this feature is not available yet')}
       />
     </aside>
   </>

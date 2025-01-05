@@ -90,6 +90,8 @@ const Profile = () => {
         onClose={() => setSettingsOpen(false)}
         onThemeToggle={toggleTheme}
         onLogout={logoutUser}
+        onDeleteAccount={() => alert('Delete Account this feature is not available yet')}
+        onChangeUsername={() => alert('Change Username this feature is not available yet')}
       />
     </div>
   );

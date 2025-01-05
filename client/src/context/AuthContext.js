@@ -1,10 +1,17 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const accessToken = Cookies.get('accessToken');
+        if (accessToken && !user) {
+            fetchUser();
+        }
+    }, [user]);
 
     const fetchUser = async () => {
         try {
@@ -17,6 +24,9 @@ export const AuthProvider = ({ children }) => {
         }
         catch (err) {
             console.error(err);
+            if (err.response?.status === 401) {
+                logout();
+            }
         }
     }
 

@@ -16,7 +16,6 @@ const Search = () => {
         handleAction: null,
     });
     const { user: loggedInUser, refreshUser } = useContext(AuthContext);
-    console.log(loggedInUser);
 
     const handleSearch = async () => {
         if (!query) return;
@@ -146,7 +145,6 @@ const Search = () => {
     };
 
     const handleRemoveFriend = async (friendId) => {
-        console.log('Removing friend:', friendId);
         try {
             const response = await removeFriend(friendId);
             setModalInfo({

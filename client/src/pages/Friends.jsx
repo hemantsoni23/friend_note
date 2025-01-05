@@ -6,7 +6,6 @@ import { AuthContext } from '../context/AuthContext';
 const Friends = () => {
     const { user, refreshUser } = useContext(AuthContext);
     const [view, setView] = useState('friends');
-    console.log(user);
 
     if (!user) return <div>Loading...</div>;
 

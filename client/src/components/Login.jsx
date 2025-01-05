@@ -33,7 +33,6 @@ const Login = ({ toggleAuthView }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log(response.data);
       const {accessToken} = response.data;
       Cookies.set("accessToken", accessToken);
       setError(null);
