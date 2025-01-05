@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import MessageModal from '../components/MessageModal';
 import { AuthContext } from '../context/AuthContext';
-import { acceptFriendRequest, rejectFriendRequest } from '../utils/friendRequestsAPI';
+import { acceptFriendRequest, rejectFriendRequest, removeFriend } from '../utils/friendRequestsAPI';
 
 const Search = () => {
     const [query, setQuery] = useState('');
@@ -16,6 +16,7 @@ const Search = () => {
         handleAction: null,
     });
     const { user: loggedInUser, refreshUser } = useContext(AuthContext);
+    console.log(loggedInUser);
 
     const handleSearch = async () => {
         if (!query) return;
@@ -145,65 +146,79 @@ const Search = () => {
     };
 
     const handleRemoveFriend = async (friendId) => {
-        // TODO: Implement removing a friend
+        console.log('Removing friend:', friendId);
+        try {
+            const response = await removeFriend(friendId);
+            setModalInfo({
+                show: true,
+                text: response?.message,
+                button1_text: '',
+                button2_text: 'Close',
+                handleAction: () => setModalInfo({ ...modalInfo, show: false }),
+            });
+            refreshUser();
+        } catch (error) {
+            console.error('Error removing friend:', error);
+        }
     }
 
     return (
-        <div className="p-4 ml-64 min-h-screen bg-background-light text-text-light dark:bg-background-dark dark:text-text-dark transition-colors duration-300">
-            <h2 className="text-2xl font-bold mb-4">Search Friends</h2>
-            <div className="flex gap-2 mb-4">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="w-full p-2 border-border-light dark:border-border-dark text-text-light rounded"
-                    placeholder="Search by name or username..."
-                />
-                <button onClick={handleSearch} className="bg-primary text-white px-4 py-2 rounded">
-                    Search
-                </button>
-            </div>
-            <div>
-                {results.length > 0 ? (
-                    results.map((user) => (
-                        <div
-                            key={user._id}
-                            className="p-4 border-b flex items-center justify-between gap-4 hover:bg-gray-50 transition"
-                        >
-                            <img
-                                src={`${process.env.PUBLIC_URL}/assets/avatars/a_${user.avatarIndex}.png`}
-                                alt="User Avatar"
-                                className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div className="flex-1">
-                                <p className="font-medium text-text-light dark:text-text-dark">{user.name}</p>
-                                <p className="text-sm text-muted-light dark:text-muted-dark">{user.email}</p>
-                            </div>
+        <div className="p-4 pl-6 min-h-screen bg-background-light text-text-light dark:bg-background-dark dark:text-text-dark transition-colors duration-300">
+            <div className='max-w-4xl mx-auto bg-background-light dark:bg-background-dark dark:text-text-dark text-text-light transition-colors duration-600 rounded-lg shadow-md p-6'>
+                <h2 className="text-2xl font-bold mb-4">Search Friends</h2>
+                <div className="flex gap-2 mb-4">
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="w-full p-2 border-border-light dark:border-border-dark text-text-light rounded"
+                        placeholder="Search by name or username..."
+                    />
+                    <button onClick={handleSearch} className="bg-primary text-white px-4 py-2 rounded">
+                        Search
+                    </button>
+                </div>
+                <div>
+                    {results.length > 0 ? (
+                        results.map((user) => (
+                            <div
+                                key={user._id}
+                                className="p-4 border-b flex items-center justify-between gap-4 hover:bg-gray-50 transition"
+                            >
+                                <img
+                                    src={`${process.env.PUBLIC_URL}/assets/avatars/a_${user.avatarIndex}.png`}
+                                    alt="User Avatar"
+                                    className="w-12 h-12 rounded-full object-cover"
+                                />
+                                <div className="flex-1">
+                                    <p className="font-medium text-text-light dark:text-text-dark">{user.name}</p>
+                                    <p className="text-sm text-muted-light dark:text-muted-dark">{user.email}</p>
+                                </div>
 
-                            {loggedInUser?.friends && loggedInUser?.friends.includes(user._id) ? (
-                                <button
-                                    className="px-4 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition"
-                                    onClick={() => handleRemoveFriend(user._id)}
-                                >
-                                    Remove Friend
-                                </button>
-                            ) : (
-                                getFriendRequestStatus(user) || (
+                                {loggedInUser?.friends && loggedInUser?.friends.some(friend => friend._id === user._id) ? (
                                     <button
-                                        className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition"
-                                        onClick={() => handleFriendRequest(user._id)}
+                                        className="px-4 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition"
+                                        onClick={() => handleRemoveFriend(user._id)}
                                     >
-                                        Send Friend Request
+                                        Remove Friend
                                     </button>
-                                )
-                            )}
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-gray-500">No results found</p>
-                )}
+                                ) : (
+                                    getFriendRequestStatus(user) || (
+                                        <button
+                                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition"
+                                            onClick={() => handleFriendRequest(user._id)}
+                                        >
+                                            Send Friend Request
+                                        </button>
+                                    )
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">No results found</p>
+                    )}
+                </div>
             </div>
-
             {modalInfo.show && (
                 <MessageModal
                     text={modalInfo.text}

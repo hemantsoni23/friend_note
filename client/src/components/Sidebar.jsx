@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaUser, FaUsers, FaHeart, FaBars, FaSearch } from 'react-icons/fa';
+import { FaX } from "react-icons/fa6";
 import SettingsModal from './SettingsModal';
 import { useSettings } from '../hooks/useSettings';
 
@@ -8,6 +9,7 @@ const Sidebar = () => {
   const location = useLocation();
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const { toggleTheme, logoutUser } = useSettings();
+  const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { to: '/profile', label: 'Profile', icon: <FaUser /> },
@@ -18,7 +20,16 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="h-full w-64 dark:bg-background-light bg-background-dark text-text-dark dark:text-text-light fixed top-0 left-0 shadow-md">
+    <>
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="lg:hidden p-4 fixed top-0 left-0 z-50"
+    >
+      {isOpen ? <FaX className='text-text-light dark:text-text-dark'/> : <FaBars className='text-text-light dark:text-text-dark'/>}
+    </button>
+    <aside className={`fixed top-0 left-0 min-h-screen bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark shadow-lg dark:shadow-background-light shadow-background-dark z-40 transform ${
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    } lg:translate-x-0 lg:static lg:flex flex-col w-64 transition-transform`}>
       <div className="p-4 flex items-center justify-center bg-primary text-white">
         <h1 className="text-lg font-bold">FriendNote</h1>
       </div>
@@ -60,6 +71,7 @@ const Sidebar = () => {
         onChangeUsername={() => console.log('Change Username')}
       />
     </aside>
+  </>
   );
 };
 

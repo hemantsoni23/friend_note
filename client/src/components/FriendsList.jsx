@@ -1,6 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import MessageModal from '../components/MessageModal';
+import { removeFriend } from '../utils/friendRequestsAPI';
 
 const FriendsList = ({ friends }) => {
+    const [modalInfo, setModalInfo] = useState({
+            show: false,
+            text: '',
+            button1_text: '',
+            button2_text: '',
+            handleAction: null,
+        });
+
+    const handleRemoveFriend = async (friendId) => {
+        try {
+            const response = await removeFriend(friendId);
+            setModalInfo({
+                show: true,
+                text: response?.message,
+                button1_text: '',
+                button2_text: 'Close',
+                handleAction: () => setModalInfo({ ...modalInfo, show: false }),
+            });
+        } catch (error) {
+            console.error('Error removing friend:', error);
+        }
+    }
+
     if (!friends || friends.length === 0) {
         return <p>No friends to show.</p>;
     }
@@ -25,12 +50,22 @@ const FriendsList = ({ friends }) => {
                     </div>
                     <button
                         className="px-3 py-1 bg-primary text-white rounded-md hover:bg-secondary"
-                        onClick={() => console.log('Remove Friend')}
+                        onClick={() => handleRemoveFriend(friend._id)}
                     >
                         Remove
                     </button>
                 </div>
             ))}
+
+            {modalInfo.show && (
+                <MessageModal
+                    text={modalInfo.text}
+                    button1_text={modalInfo.button1_text}
+                    button2_text={modalInfo.button2_text}
+                    onClose={() => setModalInfo({ ...modalInfo, show: false })}
+                    handleAction={modalInfo.handleAction}
+                />
+            )}
         </div>
     );
 };

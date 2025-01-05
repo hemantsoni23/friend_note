@@ -78,20 +78,26 @@ const FriendRequests = ({ sentRequests, receivedRequests, refreshUser }) => {
                                     <p className="font-medium">{request.senderId.name}</p>
                                     <p className="text-sm text-muted">{request.senderId.username}</p>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        className="px-4 py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition"
-                                        onClick={() => handleAcceptRequest(request._id)}
-                                    >
-                                        Accept
-                                    </button>
-                                    <button
-                                        className="px-4 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition"
-                                        onClick={() => handleRejectRequest(request._id)}
-                                    >
-                                        Reject
-                                    </button>
-                                </div>
+                                {
+                                    request.status === 'pending' ?
+                                    (
+                                        <div className="flex gap-2">
+                                            <button
+                                                className="px-4 py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition"
+                                                onClick={() => handleAcceptRequest(request._id)}
+                                            >
+                                                Accept
+                                            </button>
+                                            <button
+                                                className="px-4 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition"
+                                                onClick={() => handleRejectRequest(request._id)}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    ) :
+                                    (<p className="text-gray-500">Status: {request.status.toString().toUpperCase()}</p>)
+                                }
                             </div>
                         ))
                     ) : (

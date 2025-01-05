@@ -29,73 +29,67 @@ const Profile = () => {
   if (!user) return <div>Loading...</div>;
 
   return (
-    <div className="p-6 ml-64 min-h-screen bg-background-light text-text-light dark:bg-background-dark dark:text-text-dark transition-colors duration-300">
-      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex items-center space-x-6">
-          {/* Avatar Section */}
+    <div className="p-6 min-h-screen bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        {/* Profile Header */}
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
           <div className="flex-shrink-0">
             <img
               src={`${process.env.PUBLIC_URL}/assets/avatars/a_${user.avatarIndex}.png`}
               alt="User Avatar"
-              className="w-24 h-24 rounded-full object-cover border-4 border-primary dark:border-secondary"
+              className="w-24 h-24 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400"
             />
           </div>
-          {/* User Details Section */}
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">{user.username}</h1>
-            <h2 className="text-xl font-bold">{user.name}</h2>
-            <p className="text-sm text-muted dark:text-gray-400 mt-1">
-              {user.bio || 'No bio provided'}
-            </p>
-            <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-2xl font-bold">{user.username}</h1>
+            <p className="text-gray-500 dark:text-gray-400">{user.bio || 'No bio provided'}</p>
+            <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
               {user?.interests.length > 0 ? (
                 user.interests.map((interest, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 text-sm rounded-full bg-primary text-white dark:bg-secondary"
+                    className="px-3 py-1 text-sm rounded-full bg-blue-500 text-white dark:bg-blue-400"
                   >
                     {interest}
                   </span>
                 ))
               ) : (
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  No interests added
-                </span>
+                <span className="text-gray-400">No interests added</span>
               )}
-            </div>
-            <div className="flex items-center mt-4 space-x-4">
-              <button
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition-colors"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </button>
-              <button
-                className="px-4 py-2 border border-border-light dark:border-border-dark rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                onClick={() => setSettingsOpen(true)}
-              >
-                Settings
-              </button>
             </div>
           </div>
         </div>
-        {/* Friend List Section */}
+
+        {/* Buttons */}
+        <div className="mt-6 flex justify-center sm:justify-start space-x-4">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit Profile
+          </button>
+          <button
+            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            onClick={() => setSettingsOpen(true)}
+          >
+            Settings
+          </button>
+        </div>
+
+        {/* Friends List */}
         <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-3">Friends ({user?.friends?.length || 0})</h2>
+          <h2 className="text-lg font-semibold">Friends ({user?.friends?.length || 0})</h2>
           <FriendsList friends={user.friends} />
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
+      {/* Modals */}
       {isEditing && <EditProfileModal user={user} onSave={handleSave} onClose={() => setIsEditing(false)} />}
-
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setSettingsOpen(false)}
         onThemeToggle={toggleTheme}
-        onDeleteAccount={() => console.log('Delete Account')}
         onLogout={logoutUser}
-        onChangeUsername={() => console.log('Change Username')}
       />
     </div>
   );
@@ -135,7 +129,7 @@ const EditProfileModal = ({ user, onSave, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md shadow-lg">
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md sm:max-w-lg shadow-lg">
         <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
 
         <div className="mb-4">
@@ -179,7 +173,7 @@ const EditProfileModal = ({ user, onSave, onClose }) => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Avatar</label>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
             {avatars.map((index) => (
               <img
                 key={index}

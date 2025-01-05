@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const UserFriend = require('../models/UserFriend');
-const Auth = require('../models/Auth');
 const FriendRequest = require('../models/FriendRequest');
 
 const getUserProfile = async (req, res) => {
@@ -46,22 +45,6 @@ const getUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
-const getOtherUserProfile = async (req, res) => {
-    try {
-        const {userId} = req.params;
-        const user = await User.findOne({ _id: userId }).select('name bio interests avatarIndex');
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
-}
 
 const updateUserProfile = async (req, res) => {
     try {
@@ -113,12 +96,52 @@ const sendFriendRequest = async (req, res) => {
 
 const getRecommendations = async (req, res) => {
     try {
-        // TODO: Implement the recommendation logic
-    }catch(error){
-        console.error(error);
+        console.log("Fetching user details...");
+        const userEmail = req.user.email;
+
+        const user = await User.findOne({ email: userEmail }).select('_id interests');
+        if (!user) {
+            console.log("User not found");
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        console.log("Fetching user friend document...");
+        const userFriendDoc = await UserFriend.findOne({ _id: user._id });
+        if (!userFriendDoc) {
+            console.log("No friends found for user");
+            return res.status(404).json({ message: 'No friends found for the user' });
+        }
+
+        const userFriends = userFriendDoc.friends.map(f => f.toString());
+
+        console.log("Fetching potential friends...");
+        const potentialFriends = await User.find({ _id: { $in: userFriends } })
+            .populate('friends')
+            .exec();
+
+        console.log("Processing recommendations...");
+        const recommendations = potentialFriends
+            .filter(friend => !userFriends.includes(friend._id.toString()))
+            .map(friend => ({
+                userId: friend._id,
+                username: friend.username,
+                avatarIndex: friend.avatarIndex,
+                mutualFriends: friend.friends
+                    .filter(f => userFriends.includes(f._id.toString())).length,
+                interestMatch: calculateInterestMatch(user.interests, friend.interests),
+            }))
+            .sort((a, b) =>
+                b.mutualFriends * 0.7 + b.interestMatch * 0.3 -
+                (a.mutualFriends * 0.7 + a.interestMatch * 0.3)
+            );
+
+        console.log("Sending recommendations...");
+        res.json(recommendations);
+    } catch (error) {
+        console.error('Error in getRecommendations:', error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
 const acceptFriendRequest = async (req, res) => {
     try {
@@ -170,9 +193,52 @@ const rejectFriendRequest = async (req, res) => {
     }
 };
 
+const removeFriend = async (req, res) => {
+    try {
+        const { friendId } = req.body;
+        const userEmail = req.user.email;
+
+        const user = await User.findOne({ email: userEmail }).select('_id');
+
+        // User is removing friend
+        await UserFriend.findOneAndUpdate(
+            { userId:user._id },
+            { $pull: { friends: friendId } }
+        );
+
+        // Friend is removing user
+        await UserFriend.findOneAndUpdate(
+            { userId: friendId },
+            { $pull: { friends: user._id } }
+        );
+
+        res.json({ message: 'Friend removed successfully.' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 const updateUsername = async (req, res) => {
     try {
-        // TODO: Implement the update username logic
+        const { email } = req.user;
+        const { username } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists. Please use something else.' });
+        }
+
+        user.username = username;
+        await user.save();
+
+        res.json({message:"Username updated successfully",user:user});
     }catch(error){
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -188,5 +254,6 @@ module.exports = {
     sendFriendRequest,
     updateUsername,
     acceptFriendRequest,
-    rejectFriendRequest
+    rejectFriendRequest,
+    removeFriend
 };

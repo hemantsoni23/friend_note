@@ -4,8 +4,8 @@ const SettingsModal = ({ isOpen, onClose, onThemeToggle, onDeleteAccount, onLogo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-background-dark dark:bg-background-light rounded-lg shadow-lg w-96 p-6">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 w-screen">
+      <div className="bg-background-dark dark:bg-background-light rounded-lg shadow-lg max-w-md w-full p-6">
         <h2 className="text-xl font-bold mb-4 dark:text-text-light text-text-dark">Settings</h2>
         <div className="space-y-4">
           <button

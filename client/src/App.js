@@ -10,6 +10,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Search = lazy(() => import("./pages/Search"));
 const Friends = lazy(() => import("./pages/Friends"));
+const RecommendationsPage = lazy(() => import("./pages/RecommendationsPage"));
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -24,14 +25,15 @@ function App() {
   }, []);
 
   return (
-    <div className="app flex">
+    <div className="app flex flex-col lg:flex-row min-h-screen">
       {user && <Sidebar />}
-      <div className={`content ${user ? "flex-1" : "w-full"}`}>
+      <div className="content w-full">
         <Suspense fallback={<Loader />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<PrivateRoutes><Profile /></PrivateRoutes>} />
             <Route path="/search" element={<PrivateRoutes><Search /></PrivateRoutes>} />
+            <Route path="/recommendations" element={<PrivateRoutes><RecommendationsPage /></PrivateRoutes>} />
             <Route path="/friends" element={<PrivateRoutes><Friends /></PrivateRoutes>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

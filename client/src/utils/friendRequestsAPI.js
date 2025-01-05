@@ -38,3 +38,22 @@ export const rejectFriendRequest = async (requestId) => {
         throw error;
     }
 };
+
+// Remove Friend
+export const removeFriend = async (friendId) => {
+    try {
+        const response = await axios.post(
+            `${process.env.REACT_APP_API_ROUTE}/api/users/removeFriend`,
+            { friendId },
+            {
+                headers: {
+                    Authorization: `Bearer ${Cookies.get('accessToken')}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error removing friend:', error);
+        throw error;
+    }
+};
